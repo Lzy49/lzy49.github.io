@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>test-canvas</title>
+    <meta
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;"
+      name="viewport"
+    />
+  </head>
+  <body>
+    <h1>svg</h1>
+    <svg id="svg" width="300" height="300" style="border: 1px solid #bbb"></svg>
+    <script src="./main.js"></script>
+    <script>
+      const rects = [
+        {
+          x: 75,
+          y: 75,
+          width: 100,
+          height: 100,
+          fill: "rgba(155,155,250,.9)",
+        },
+        {
+          x: 125,
+          y: 125,
+          width: 100,
+          height: 100,
+          fill: "rgba(250,155,155,.9)",
+        },
+      ];
+      play(
+        rects.map((item) => Object.assign({}, item)),
+        createSvgContext()
+      );
+    </script>
+  </body>
+</html>
