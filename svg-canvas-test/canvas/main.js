@@ -61,6 +61,8 @@ canvas.addEventListener("touchmove", (e) => {
       }
     );
     scale = initDistance / distance
+    log(scale)
+    render();
     return;
   }
   if (path.length === 1) {
@@ -71,3 +73,6 @@ canvas.addEventListener("touchmove", (e) => {
 canvas.addEventListener("touchend", (e) => {
   path = [];
 });
+function log(str){
+  document.getElementById('logs').innerText = str;
+}
