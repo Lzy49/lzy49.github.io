@@ -60,7 +60,8 @@ canvas.addEventListener("touchmove", (e) => {
         y: path[1][path.length].clientY,
       }
     );
-    scale = initDistance / distance
+    scale = isNaN(initDistance / distance) ? 0 : initDistance / distance 
+    console.log(initDistance, distance)
     log(scale)
     render();
     return;
