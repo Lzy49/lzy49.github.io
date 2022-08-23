@@ -1,4 +1,4 @@
-function play(rects, { clear, drawRect, context, contextInfo }) {
+function play(rects, { clear, drawRect, contextInfo, addEvent }) {
   render();
   // 点击
   watchClick();
@@ -6,13 +6,13 @@ function play(rects, { clear, drawRect, context, contextInfo }) {
   function watchMove() {
     let path = [];
     let scale = 1;
-    context.addEventListener("touchmove", (e) => {
+    addEvent("touchmove", (e) => {
       catchPath(e);
       if (path.length === 2) {
         isZoom();
       }
     });
-    context.addEventListener("touchend", (e) => {
+    addEvent("touchend", (e) => {
       path = [];
       rects = setScale(scale);
       scale = 1;
@@ -38,7 +38,7 @@ function play(rects, { clear, drawRect, context, contextInfo }) {
     }
   }
   function watchClick() {
-    context.addEventListener("click", (e) => {
+    addEvent("click", (e) => {
       const i = catchItem(e);
       if (i !== -1) {
         const item = rects[i];
@@ -88,7 +88,6 @@ function play(rects, { clear, drawRect, context, contextInfo }) {
     return dep;
   }
 }
-
 function createContext() {
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
@@ -105,7 +104,7 @@ function createContext() {
     clear,
     drawRect,
     contextInfo: canvas.getBoundingClientRect(),
-    context: canvas,
+    addEvent: canvas.addEventListener,
   };
 }
 function createSvgContext() {
@@ -128,6 +127,6 @@ function createSvgContext() {
     clear,
     drawRect,
     contextInfo: svg.getBoundingClientRect(),
-    context: svg,
+    addEvent:svg.addEventListener,
   };
 }
