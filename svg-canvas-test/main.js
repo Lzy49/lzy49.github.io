@@ -1,3 +1,4 @@
+alert(`It's new`)
 function play(rects, { clear, drawRect, contextInfo, addEvent }) {
   render();
   // 点击
@@ -39,7 +40,6 @@ function play(rects, { clear, drawRect, contextInfo, addEvent }) {
   }
   function watchClick() {
     addEvent("click", (e) => {
-      alert(1)
       const i = catchItem(e);
       if (i !== -1) {
         const item = rects[i];
