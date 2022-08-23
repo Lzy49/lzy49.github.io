@@ -130,11 +130,12 @@ function createSvgContext() {
     addEvent: (...args) =>canvas.addEventListener(...args),
   };
 }
+// 防止触发 浏览器缩放。
 window.onload=function () {
   document.addEventListener('touchstart',function (event) {
-    if(event.touches.length>1){
+    // if(event.touches.length>1){
       event.preventDefault();
-    }
+    // }
   });
   var lastTouchEnd=0;
   document.addEventListener('touchend',function (event) {
