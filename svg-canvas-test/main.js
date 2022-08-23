@@ -104,7 +104,7 @@ function createContext() {
     clear,
     drawRect,
     contextInfo: canvas.getBoundingClientRect(),
-    addEvent: canvas.addEventListener,
+    addEvent: (...args) =>canvas.addEventListener(...args),
   };
 }
 function createSvgContext() {
@@ -127,7 +127,7 @@ function createSvgContext() {
     clear,
     drawRect,
     contextInfo: svg.getBoundingClientRect(),
-    addEvent:svg.addEventListener,
+    addEvent: (...args) =>canvas.addEventListener(...args),
   };
 }
 window.onload=function () {
