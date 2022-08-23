@@ -1,4 +1,3 @@
-alert(`It's new`)
 function play(rects, { clear, drawRect, contextInfo, addEvent }) {
   render();
   // 点击
