@@ -39,9 +39,7 @@ function play(rects, { clear, drawRect, contextInfo, addEvent }) {
   }
   function watchClick() {
     addEvent("click", (e) => {
-      alert('click')
       const i = catchItem(e);
-      alert(i)
       if (i !== -1) {
         const item = rects[i];
         rects.splice(i, 1);
