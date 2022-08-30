@@ -1,0 +1,19 @@
+{
+  "name": "mark-img",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev":"yarn build --watch",
+    "build": "rollup -c rollup.config.js" ,
+    "serve":"browser-sync start --server --files \"**/*.*\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^8.4.0",
+    "rollup": "^2.78.1"
+  }
+}

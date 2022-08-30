@@ -127,7 +127,7 @@ function createSvgContext() {
     clear,
     drawRect,
     contextInfo: svg.getBoundingClientRect(),
-    addEvent: (...args) =>canvas.addEventListener(...args),
+    addEvent: (...args) => svg.addEventListener(...args),
   };
 }
 // 防止触发 浏览器缩放。
