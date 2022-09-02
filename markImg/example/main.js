@@ -108,7 +108,7 @@ async function init(bg) {
   document.getElementById("delete").addEventListener("click", () => {
     delete ctx.itemList[item.id];
     console.log(ctx.itemList);
-    item = {};
+    item = null;
     workStation();
   });
   const file = document.getElementById("file");
