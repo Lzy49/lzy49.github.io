@@ -1,6 +1,6 @@
 export function funDownload(content: string | object, filename: string) {
   download(preContent());
-  function download(content:string) {
+  function download(content: string) {
     let eleLink = document.createElement("a");
     eleLink.download = filename;
     eleLink.style.display = "none";
@@ -22,4 +22,33 @@ export function funDownload(content: string | object, filename: string) {
 }
 export function canvas2img(canvas, option) {
   return canvas.toDataURL(option || "image/png");
+}
+export function getItemWithPlaces(
+  list: itemListType,
+  places: { x: number; y: number },
+  types: Array<'text' | 'image' | 'rect'>
+) {
+  const keys = Object.keys(list).reverse();
+  for (const k of keys) {
+    const { x, y, width, height, type } = list[k];
+    const x2 = x + Number(width);
+    const y2 = y + Number(height);
+    if (places.x > x && places.x < x2 && places.y > y && places.y < y2 && types.indexOf(type) > -1) {
+      console.log(list[k], places);
+      return list[k];
+    }
+  }
+  return false;
+}
+type cacheFn = <T, U>(key: number | string, args: U) => T;
+export function cache(fn: Function): cacheFn {
+  const context = {};
+  return function <T, U>(key: number | string, args: U): T {
+    if (context[key]) {
+      return context[key];
+    }
+    const result = fn(args);
+    context[key] = result;
+    return context[key];
+  };
 }

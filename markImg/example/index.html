@@ -9,20 +9,50 @@
   <body>
     <style>
       canvas {
-        border: 1px solid #eee;
+        border: 1px solid #ddd;
+      }
+      h2 {
+        line-height: 0;
+        padding: 0;
       }
     </style>
-    <div>
-      上传背景：<input type="file" id="bg" accept="image/x-png,image/jpeg" />
+    <div style="height: 130px; border: 1px solid #ddd">
+      <h2>操作板</h2>
+      <div>
+        上传背景：<input type="file" id="bg" accept="image/x-png,image/jpeg" />
+        导入位置：<input type="file" id="file" />
+        <button id="downloadBtn">下载JSON</button>
+      </div>
+      <div id="workStation" style="display: none">
+        <p id="title">选定块编号为：<span></span></p>
+        <span>width</span><input id="width" type="number" /> <span>height</span
+        ><input id="height" type="number" />
+        <button id="set">设置</button>
+        <button id="delete">删除该元素</button>
+      </div>
     </div>
-    <!-- <div>
-      上传标记：<input type="file" id="bg" accept="image/x-png,image/jpeg" />
-    </div> -->
-    <div>操作：<button id="downloadBtn">下载</button></div>
     <div>
-      <canvas id="canvas"></canvas>
+      <canvas id="canvas" width="0" height="0"></canvas>
     </div>
 
     <script type="module" src="./main.js"></script>
+    <style>
+      #workStation {
+        line-height: 30px;
+        border: 1px solid orange;
+        background: rgba(199, 199, 0, 0.2);
+      }
+      #workStation p {
+        padding: 0;
+        margin: 0;
+      }
+      #workStation input {
+        width: 100px;
+      }
+      #workStation span {
+        display: inline-block;
+        width: 60px;
+      }
+    </style>
   </body>
 </html>
