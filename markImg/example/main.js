@@ -22,7 +22,7 @@ async function init(bg) {
     width: 30,
     height: 30,
   };
-  const ctx = await createContext("canvas", { bg ,width:500});
+  const ctx = await createContext("canvas", { bg, width: 500 });
   let number = 1;
   let item = null;
   ctx.addEvent("click", async ({ withKeys, places }) => {
@@ -109,6 +109,7 @@ async function init(bg) {
     delete ctx.itemList[item.id];
     console.log(ctx.itemList);
     item = {};
+    workStation();
   });
   const file = document.getElementById("file");
   file.addEventListener("change", (e) => {
@@ -120,7 +121,7 @@ async function init(bg) {
       reader.onload = async function () {
         const res = JSON.parse(this.result);
         console.log(res);
-        for(const v of res){
+        for (const v of res) {
           await ctx.drawText(v);
         }
       };
