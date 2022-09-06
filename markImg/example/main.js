@@ -73,7 +73,7 @@ async function init(bg) {
       }
     }
     funDownload(ctx.canvas2img(), new Date().toUTCString() + ".png");
-    funDownload(result, new Date().toUTCString() + ".json");
+    // funDownload(result, new Date().toUTCString() + ".json");
   });
   const widthInput = document.getElementById("width");
   const heightInput = document.getElementById("height");
@@ -107,14 +107,12 @@ async function init(bg) {
   });
   document.getElementById("delete").addEventListener("click", () => {
     delete ctx.itemList[item.id];
-    console.log(ctx.itemList);
     item = null;
     workStation();
   });
   const file = document.getElementById("file");
   file.addEventListener("change", (e) => {
     const f = e.target.files[0];
-    console.log(f);
     if (f) {
       var reader = new FileReader();
       reader.readAsText(f, "gbk"); //gbk编码
@@ -126,6 +124,5 @@ async function init(bg) {
         }
       };
     }
-    console.log(e);
   });
 }

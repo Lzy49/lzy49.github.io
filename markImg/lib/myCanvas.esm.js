@@ -1,20 +1,3 @@
-const images = {};
-function getImage(link) {
-    return new Promise((resolve, reject) => {
-        if (images[link]) {
-            resolve(images[link]);
-            return;
-        }
-        let image = new Image();
-        image.src = link;
-        image.onload = function () {
-            images[link] = image;
-            resolve(image);
-        };
-        image.onerror = reject;
-    });
-}
-
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
 
@@ -40,54 +23,28 @@ function __awaiter(thisArg, _arguments, P, generator) {
     });
 }
 
-function funDownload(content, filename) {
-    download(preContent());
-    function download(content) {
-        let eleLink = document.createElement("a");
-        eleLink.download = filename;
-        eleLink.style.display = "none";
-        eleLink.href = content;
-        document.body.appendChild(eleLink);
-        eleLink.click();
-        document.body.removeChild(eleLink);
-    }
-    function preContent() {
-        if (typeof content === "object") {
-            content = JSON.stringify(content);
+const images = {};
+function getImage(link) {
+    return new Promise((resolve, reject) => {
+        if (images[link]) {
+            resolve(images[link]);
+            return;
         }
-        if (!content.startsWith("data:image/png;base64")) {
-            const blob = new Blob([content]);
-            content = URL.createObjectURL(blob);
-        }
-        return content;
-    }
+        resolve(downloadImg(link));
+    });
 }
-function canvas2img(canvas, option) {
-    return canvas.toDataURL(option || "image/png");
-}
-function getItemWithPlaces(list, places, types) {
-    const keys = Object.keys(list).reverse();
-    for (const k of keys) {
-        const { x, y, width, height, type } = list[k];
-        const x2 = x + Number(width);
-        const y2 = y + Number(height);
-        if (places.x > x && places.x < x2 && places.y > y && places.y < y2 && types.indexOf(type) > -1) {
-            console.log(list[k], places);
-            return list[k];
-        }
-    }
-    return false;
-}
-function cache(fn) {
-    const context = {};
-    return function (key, args) {
-        if (context[key]) {
-            return context[key];
-        }
-        const result = fn(args);
-        context[key] = result;
-        return context[key];
-    };
+function downloadImg(link) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, reject) => {
+            let image = new Image();
+            image.src = link;
+            image.onload = function () {
+                images[link] = image;
+                resolve(image);
+            };
+            image.onerror = reject;
+        });
+    });
 }
 
 const DEFAULT = {
@@ -104,37 +61,40 @@ const DEFAULT = {
     }
 };
 
-function getCanvas(canvasId, { width, height }) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const canvas = document.getElementById(canvasId);
-        if (canvas) {
-            canvas.width = width || DEFAULT.canvas.width;
-            canvas.height = height || DEFAULT.canvas.height;
-            canvas._id = new Date().getTime() + Math.round(Math.random() * 10);
-            console.log(canvas._id);
-            return canvas;
-        }
-        throw new Error("canvas 未找到");
-    });
+function createCanvas(canvasId, { width, height }) {
+    const canvas = document.getElementById(canvasId);
+    if (canvas) {
+        setCanvasInfo();
+        return canvas;
+    }
+    throw new Error("canvas 未找到");
+    function setCanvasInfo() {
+        canvas.width = width;
+        canvas.height = height;
+    }
 }
-function getCtx(canvas) {
-    const fn = cache(function (canvas) {
-        const ctx = canvas.getContext("2d");
-        if (!ctx)
-            throw new Error("canvas 无法获取 上下文");
-        return ctx;
-    });
-    return fn(canvas._id, canvas);
+function createCtx(canvas) {
+    const ctx = canvas.getContext("2d");
+    if (!ctx)
+        throw new Error("canvas 无法获取 上下文");
+    return ctx;
 }
-function getContextInfo(canvas) {
-    const fn = cache(function (canvas) {
-        return canvas.getBoundingClientRect();
-    });
-    return fn(canvas._id, canvas);
+function createContextInfo(canvas) {
+    return canvas.getBoundingClientRect();
 }
-function createAddEvent(canvas) {
-    const canvasInfo = getContextInfo(canvas);
-    return function addEvent(type, callback) {
+function createAPI(canvasId, option) {
+    const canvas = createCanvas(canvasId, option);
+    const ctx = createCtx(canvas);
+    const canvasInfo = createContextInfo(canvas);
+    return {
+        addEvent,
+        drawImage,
+        drawText,
+        drawRect,
+        clear,
+        canvas2img
+    };
+    function addEvent(type, callback) {
         canvas.addEventListener(type, (e) => {
             const places = [];
             const withKeys = [];
@@ -150,29 +110,57 @@ function createAddEvent(canvas) {
             }
             callback({ withKeys, places });
         });
-    };
-    function getPlace(event) {
-        return {
-            y: Math.round(event.pageY - canvasInfo.y),
-            x: Math.round(event.pageX - canvasInfo.x),
-        };
+        function getPlace(event) {
+            return {
+                y: Math.round(event.pageY - canvasInfo.y),
+                x: Math.round(event.pageX - canvasInfo.x),
+            };
+        }
+        function getWithKeyboard(e) {
+            const keyName = [
+                "shift",
+                "ctrl",
+                "alt",
+                "meta",
+            ];
+            const keys = keyName.reduce((result, value) => {
+                e[value + "Key"] && result.push(value);
+                return result;
+            }, []);
+            return keys;
+        }
     }
-    function getWithKeyboard(e) {
-        const keyName = [
-            "shift",
-            "ctrl",
-            "alt",
-            "meta",
-        ];
-        const keys = keyName.reduce((result, value) => {
-            e[value + "Key"] && result.push(value);
-            return result;
-        }, []);
-        return keys;
+    function drawImage(result) {
+        console.log(result);
+        ctx.drawImage(result.image, result.x, result.y, result.width, result.height);
+    }
+    function drawText(font) {
+        ctx.direction = font.direction;
+        ctx.fillStyle = font.fill;
+        ctx.font = font.font;
+        ctx.textAlign = font.align;
+        ctx.textBaseline = font.vertical;
+        font.stroke ? ctx.strokeText(...font.args) : ctx.fillText(...font.args);
+    }
+    function drawRect(rect) {
+        ctx.fillStyle = rect.full;
+        if (rect.stroke) {
+            ctx.strokeRect(...rect.args);
+        }
+        else {
+            ctx.fillRect(...rect.args);
+        }
+    }
+    function clear() {
+        const { width, height } = canvasInfo;
+        ctx.clearRect(0, 0, width, height);
+    }
+    function canvas2img(option) {
+        return canvas.toDataURL(option || "image/png");
     }
 }
-function createCavasMethods(canvas) {
-    const ctx = getCtx(canvas);
+
+function createCavasMethods({ drawImage: ctxDrawImage, drawText: ctxDrawText, drawRect: ctxDrawRect, clear: ctxClear, }) {
     function drawImage(imageInfo) {
         return __awaiter(this, void 0, void 0, function* () {
             let { image, width, height, x, y } = imageInfo;
@@ -186,36 +174,33 @@ function createCavasMethods(canvas) {
                 width: width || image.width,
                 height: height || image.height,
             };
-            ctx.drawImage(result.image, result.x, result.y, result.width, result.height);
+            ctxDrawImage(result);
             return Object.assign(Object.assign({}, result), { type: "image" });
         });
     }
     function drawText(font) {
-        drawBg();
-        drawText();
-        return Object.assign(Object.assign({}, font), { type: "text" });
-        function drawText() {
-            ctx.direction = font.direction || DEFAULT.text.direction;
-            ctx.fillStyle = font.fill || DEFAULT.text.fill;
-            ctx.font = font.font || DEFAULT.text.font;
-            ctx.textAlign = font.align || DEFAULT.text.align;
-            ctx.textBaseline = font.vertical || DEFAULT.text.vertical;
-            const args = [font.text, font.x, font.y];
-            switch (font.vertical) {
-                case "middle":
-                    args[2] = font.y + Math.round(font.height / 2);
-                    break;
-                case "bottom":
-                    args[2] = font.y + font.height;
-                    break;
-            }
-            switch (font.align) {
-                case "center":
-                    args[1] = font.x + Math.round(font.width / 2);
-                    break;
-            }
-            font.stroke ? ctx.strokeText(...args) : ctx.fillText(...args);
+        font.direction = font.direction || DEFAULT.text.direction;
+        font.fill = font.fill || DEFAULT.text.fill;
+        font.font = font.font || DEFAULT.text.font;
+        font.align = font.align || DEFAULT.text.align;
+        font.vertical = font.vertical || DEFAULT.text.vertical;
+        const args = [font.text, font.x, font.y];
+        switch (font.vertical) {
+            case "middle":
+                args[2] = font.y + Math.round(font.height / 2);
+                break;
+            case "bottom":
+                args[2] = font.y + font.height;
+                break;
         }
+        switch (font.align) {
+            case "center":
+                args[1] = font.x + Math.round(font.width / 2);
+                break;
+        }
+        drawBg();
+        ctxDrawText(Object.assign(Object.assign({}, font), { args }));
+        return Object.assign(Object.assign({}, font), { type: "text" });
         function drawBg() {
             if (font.bg) {
                 drawRect({
@@ -229,29 +214,14 @@ function createCavasMethods(canvas) {
         }
     }
     function drawRect(rect) {
-        ctx.fillStyle = rect.full;
-        const args = [
-            rect.x,
-            rect.y,
-            rect.width,
-            rect.height,
-        ];
-        if (rect.stroke) {
-            ctx.strokeRect(...args);
-        }
-        else {
-            ctx.fillRect(...args);
-        }
+        const args = [rect.x, rect.y, rect.width, rect.height];
+        ctxDrawRect(Object.assign(Object.assign({}, rect), { args }));
         return Object.assign(Object.assign({}, rect), { type: "rect" });
     }
-    function clear() {
-        const { width, height } = getContextInfo(canvas);
-        ctx.clearRect(0, 0, width, height);
-    }
     function refresh() {
-        clear();
+        ctxClear();
         for (const k in itemList) {
-            const item = itemList[k];
+            const item = Object.assign({}, itemList[k]);
             if (item) {
                 switch (item.type) {
                     case "text":
@@ -280,7 +250,7 @@ function createCavasMethods(canvas) {
             apply: collectMethodResult,
         };
         return {
-            clear,
+            clear: ctxClear,
             refresh,
             itemList,
             drawText: new Proxy(drawText, handler),
@@ -298,6 +268,7 @@ function createCavasMethods(canvas) {
     function proxyResult(result) {
         const handler = {
             set(target, key, value) {
+                debugger;
                 Promise.resolve().then(() => {
                     refresh();
                 });
@@ -311,10 +282,10 @@ function createCavasMethods(canvas) {
 function createContext(canvasId, rawOption) {
     return __awaiter(this, void 0, void 0, function* () {
         const option = yield preOption(rawOption);
-        const canvas = yield getCanvas(canvasId, option);
-        const methods = createCavasMethods(canvas);
+        const api = createAPI(canvasId, option);
+        const methods = createCavasMethods(api);
         init();
-        return Object.assign(Object.assign({ addEvent: createAddEvent(canvas) }, methods), { canvas2img: canvas2img.bind(null, canvas) });
+        return Object.assign(Object.assign({ addEvent: api.addEvent }, methods), { canvas2img: api.canvas2img });
         function init() {
             if (option.bgImg) {
                 methods.drawImage({
@@ -326,26 +297,72 @@ function createContext(canvasId, rawOption) {
                 });
             }
         }
-        function preOption({ bg, width, height, }) {
-            var _a, _b, _c, _d;
+        function preOption(rawContextOption) {
             return __awaiter(this, void 0, void 0, function* () {
-                const result = { width, height };
-                if (bg) {
-                    result.bgImg = yield getImage(bg);
-                }
-                if (!width && !height) {
-                    result.width = (_a = result.bgImg) === null || _a === void 0 ? void 0 : _a.width;
-                    result.height = (_b = result.bgImg) === null || _b === void 0 ? void 0 : _b.height;
-                }
-                else if (width && !height) {
-                    result.width = width;
-                    result.height =
-                        (width / (((_c = result.bgImg) === null || _c === void 0 ? void 0 : _c.width) || 0)) * (((_d = result.bgImg) === null || _d === void 0 ? void 0 : _d.height) || 0);
-                }
+                const result = rawContextOption;
+                yield handleBg();
+                handleDefine();
                 return result;
+                function handleDefine() {
+                    if ((result === null || result === void 0 ? void 0 : result.bgImg) && (!result.height || !result.width)) {
+                        const { width, height } = result.bgImg;
+                        result.height = result.height || height;
+                        result.width = result.width || width;
+                        result.height && (result.width = (result.height / height) * width);
+                        result.width && (result.height = (result.width / width) * height);
+                    }
+                    result.width = result.width || DEFAULT.canvas.width;
+                    result.height = result.height || DEFAULT.canvas.height;
+                }
+                function handleBg() {
+                    return __awaiter(this, void 0, void 0, function* () {
+                        if (result.bg) {
+                            result.bgImg = yield getImage(result.bg);
+                        }
+                    });
+                }
             });
         }
     });
 }
 
-export { canvas2img, createContext, funDownload, getImage, getItemWithPlaces };
+function funDownload(content, filename) {
+    download(preContent());
+    function download(content) {
+        let eleLink = document.createElement("a");
+        eleLink.download = filename;
+        eleLink.style.display = "none";
+        eleLink.href = content;
+        document.body.appendChild(eleLink);
+        eleLink.click();
+        document.body.removeChild(eleLink);
+    }
+    function preContent() {
+        if (typeof content === "object") {
+            content = JSON.stringify(content);
+        }
+        if (!content.startsWith("data:image/png;base64")) {
+            const blob = new Blob([content]);
+            content = URL.createObjectURL(blob);
+        }
+        return content;
+    }
+}
+function getItemWithPlaces(list, places, types) {
+    const keys = Object.keys(list).reverse();
+    const k = keys.find((k) => {
+        const { x, y, width, height, type } = list[k];
+        const x2 = x + Number(width);
+        const y2 = y + Number(height);
+        if (places.x > x &&
+            places.x < x2 &&
+            places.y > y &&
+            places.y < y2 &&
+            types.indexOf(type) > -1) {
+            return true;
+        }
+    });
+    return k ? list[k] : false;
+}
+
+export { createContext, funDownload, getImage, getItemWithPlaces };

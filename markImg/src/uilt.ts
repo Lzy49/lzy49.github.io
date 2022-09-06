@@ -20,30 +20,31 @@ export function funDownload(content: string | object, filename: string) {
     return content;
   }
 }
-export function canvas2img(canvas, option) {
-  return canvas.toDataURL(option || "image/png");
-}
 export function getItemWithPlaces(
   list: itemListType,
   places: { x: number; y: number },
-  types: Array<'text' | 'image' | 'rect'>
+  types: Array<"text" | "image" | "rect">
 ) {
   const keys = Object.keys(list).reverse();
-  for (const k of keys) {
+  const k = keys.find((k) => {
     const { x, y, width, height, type } = list[k];
     const x2 = x + Number(width);
     const y2 = y + Number(height);
-    if (places.x > x && places.x < x2 && places.y > y && places.y < y2 && types.indexOf(type) > -1) {
-      console.log(list[k], places);
-      return list[k];
+    if (
+      places.x > x &&
+      places.x < x2 &&
+      places.y > y &&
+      places.y < y2 &&
+      types.indexOf(type) > -1
+    ) {
+      return true;
     }
-  }
-  return false;
+  });
+  return k ? list[k] : false;
 }
-type cacheFn = <T, U>(key: number | string, args: U) => T;
-export function cache(fn: Function): cacheFn {
+export function cache<T, U>(fn: Function) {
   const context = {};
-  return function <T, U>(key: number | string, args: U): T {
+  return function (key: number | string, args: U): T {
     if (context[key]) {
       return context[key];
     }
