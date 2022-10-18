@@ -62,15 +62,22 @@ const DEFAULT = {
 };
 
 function createCanvas(canvasId, { width, height }) {
-    const canvas = document.getElementById(canvasId);
+    let canvas;
+    if (typeof canvasId === "string") {
+        canvas = document.getElementById(canvasId);
+    }
+    else {
+        canvas = canvasId;
+    }
     if (canvas) {
-        setCanvasInfo();
+        canvas = setCanvasInfo(canvas);
         return canvas;
     }
     throw new Error("canvas 未找到");
-    function setCanvasInfo() {
+    function setCanvasInfo(canvas) {
         canvas.width = width;
         canvas.height = height;
+        return canvas;
     }
 }
 function createCtx(canvas) {
@@ -131,7 +138,6 @@ function createAPI(canvasId, option) {
         }
     }
     function drawImage(result) {
-        console.log(result);
         ctx.drawImage(result.image, result.x, result.y, result.width, result.height);
     }
     function drawText(font) {
@@ -145,10 +151,10 @@ function createAPI(canvasId, option) {
     function drawRect(rect) {
         ctx.fillStyle = rect.full;
         if (rect.stroke) {
-            ctx.strokeRect(...rect.args);
+            ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
         }
         else {
-            ctx.fillRect(...rect.args);
+            ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
         }
     }
     function clear() {
@@ -179,28 +185,41 @@ function createCavasMethods({ drawImage: ctxDrawImage, drawText: ctxDrawText, dr
         });
     }
     function drawText(font) {
-        font.direction = font.direction || DEFAULT.text.direction;
-        font.fill = font.fill || DEFAULT.text.fill;
-        font.font = font.font || DEFAULT.text.font;
-        font.align = font.align || DEFAULT.text.align;
-        font.vertical = font.vertical || DEFAULT.text.vertical;
-        const args = [font.text, font.x, font.y];
-        switch (font.vertical) {
-            case "middle":
-                args[2] = font.y + Math.round(font.height / 2);
-                break;
-            case "bottom":
-                args[2] = font.y + font.height;
-                break;
-        }
-        switch (font.align) {
-            case "center":
-                args[1] = font.x + Math.round(font.width / 2);
-                break;
-        }
+        handleFont();
+        setDefaultValue();
+        const textOption = setDrawTextOption();
         drawBg();
-        ctxDrawText(Object.assign(Object.assign({}, font), { args }));
+        ctxDrawText(Object.assign(Object.assign({}, font), { args: textOption }));
         return Object.assign(Object.assign({}, font), { type: "text" });
+        function setDrawTextOption() {
+            const args = [font.text, font.x, font.y];
+            switch (font.vertical) {
+                case "middle":
+                    args[2] = font.y + Math.round(font.height / 2);
+                    break;
+                case "bottom":
+                    args[2] = font.y + font.height;
+                    break;
+            }
+            switch (font.align) {
+                case "center":
+                    args[1] = font.x + Math.round(font.width / 2);
+                    break;
+            }
+            return args;
+        }
+        function setDefaultValue() {
+            font.direction = font.direction || DEFAULT.text.direction;
+            font.fill = font.fill || DEFAULT.text.fill;
+            font.font = font.font || DEFAULT.text.font;
+            font.align = font.align || DEFAULT.text.align;
+            font.vertical = font.vertical || DEFAULT.text.vertical;
+        }
+        function handleFont() {
+            if (!font.font) {
+                font.font = `${font.fontWeight || 400} ${font.fontSize || 0 * 3}px  ${font.fontFamily || "Arial"}`;
+            }
+        }
         function drawBg() {
             if (font.bg) {
                 drawRect({
@@ -214,8 +233,7 @@ function createCavasMethods({ drawImage: ctxDrawImage, drawText: ctxDrawText, dr
         }
     }
     function drawRect(rect) {
-        const args = [rect.x, rect.y, rect.width, rect.height];
-        ctxDrawRect(Object.assign(Object.assign({}, rect), { args }));
+        ctxDrawRect(rect);
         return Object.assign(Object.assign({}, rect), { type: "rect" });
     }
     function refresh() {

@@ -20,6 +20,9 @@ type rawText = {
   direction?: CanvasDirection;
   stroke?: boolean;
   bg?: string;
+  fontFamily?: string;
+  fontWeight?: string;
+  fontSize?: number;
 };
 type text = rawText & { type: "text" };
 type rawImageInfo = {

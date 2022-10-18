@@ -23,31 +23,47 @@ function createCavasMethods({
     return { ...result, type: "image" };
   }
   function drawText(font: rawText): text {
-    font.direction = font.direction || DEFAULT.text.direction;
-    font.fill = font.fill || DEFAULT.text.fill;
-    font.font = font.font || DEFAULT.text.font;
-    font.align = font.align || DEFAULT.text.align;
-    font.vertical = font.vertical || DEFAULT.text.vertical;
-    const args: [string, number, number] = [font.text, font.x, font.y];
-    switch (font.vertical) {
-      case "middle":
-        args[2] = font.y + Math.round(font.height / 2);
-        break;
-      case "bottom":
-        args[2] = font.y + font.height;
-        break;
-    }
-    switch (font.align) {
-      case "center":
-        args[1] = font.x + Math.round(font.width / 2);
-        break;
-    }
+    handleFont();
+    setDefaultValue();
+    const textOption: [string, number, number] = setDrawTextOption();
     drawBg();
-    ctxDrawText({ ...font, args });
+    ctxDrawText({ ...font, args: textOption });
     return {
       ...font,
       type: "text",
     };
+    function setDrawTextOption() {
+      const args: [string, number, number] = [font.text, font.x, font.y];
+      switch (font.vertical) {
+        case "middle":
+          args[2] = font.y + Math.round(font.height / 2);
+          break;
+        case "bottom":
+          args[2] = font.y + font.height;
+          break;
+      }
+      switch (font.align) {
+        case "center":
+          args[1] = font.x + Math.round(font.width / 2);
+          break;
+      }
+      return args;
+    }
+
+    function setDefaultValue() {
+      font.direction = font.direction || DEFAULT.text.direction;
+      font.fill = font.fill || DEFAULT.text.fill;
+      font.font = font.font || DEFAULT.text.font;
+      font.align = font.align || DEFAULT.text.align;
+      font.vertical = font.vertical || DEFAULT.text.vertical;
+    }
+
+    function handleFont() {
+      if (!font.font) {
+        font.font = `${font.fontWeight || 400} ${font.fontSize || 0 * 3}px  ${font.fontFamily || "Arial"}`;
+      }
+    }
+
     function drawBg() {
       if (font.bg) {
         drawRect({
@@ -61,8 +77,7 @@ function createCavasMethods({
     }
   }
   function drawRect(rect: rawRect): rect {
-    const args = [rect.x, rect.y, rect.width, rect.height];
-    ctxDrawRect({ ...rect, args });
+    ctxDrawRect(rect);
     return { ...rect, type: "rect" };
   }
   function refresh() {

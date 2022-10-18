@@ -1,13 +1,19 @@
-function createCanvas(canvasId, { width, height }) {
-  const canvas = document.getElementById(canvasId) as canvasType;
+function createCanvas(canvasId, { width, height }): canvasType {
+  let canvas: HTMLCanvasElement | undefined;
+  if (typeof canvasId === "string") {
+    canvas = document.getElementById(canvasId) as canvasType;
+  } else {
+    canvas = canvasId;
+  }
   if (canvas) {
-    setCanvasInfo();
-    return canvas;
+    canvas = setCanvasInfo(canvas);
+    return canvas as canvasType;
   }
   throw new Error("canvas 未找到");
-  function setCanvasInfo() {
+  function setCanvasInfo(canvas) {
     canvas.width = width;
     canvas.height = height;
+    return canvas;
   }
 }
 function createCtx(canvas: HTMLCanvasElement) {
@@ -69,7 +75,6 @@ export function createAPI(canvasId, option) {
     }
   }
   function drawImage(result) {
-    console.log(result)
     ctx.drawImage(
       result.image,
       result.x,
@@ -88,14 +93,12 @@ export function createAPI(canvasId, option) {
     ctx.textBaseline = font.vertical;
     font.stroke ? ctx.strokeText(...font.args) : ctx.fillText(...font.args);
   }
-  function drawRect(
-    rect: rawRect & { args: [number, number, number, number] }
-  ) {
+  function drawRect(rect: rawRect) {
     ctx.fillStyle = rect.full;
     if (rect.stroke) {
-      ctx.strokeRect(...rect.args);
+      ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
     } else {
-      ctx.fillRect(...rect.args);
+      ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
     }
   }
   function clear() {
